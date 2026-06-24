@@ -5,3 +5,8 @@ build/
 *.trace
 *.hash
 lake-manifest.json
+
+# SMT verify - large data files
+smt_verify/data/
+smt_verify/mnist_tiny.pt
+smt_verify/test_samples.npy
