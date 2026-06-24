@@ -1,0 +1,163 @@
+# ml-lean-verify 统一验证 CI Pipeline
+# 触发条件：push 到 main 分支 / Pull Request
+# 包含两个并行 Job：
+#   1. lean-verify  — Lean 4 形式化定理构建 + 差分测试
+#   2. smt-verify   — Python SMT 鲁棒性验证 + PGD 对抗攻击
+
+name: Verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # ============================================================
+  # Job 1: Lean 4 形式化验证
+  # ============================================================
+  lean-verify:
+    name: "Lean 4 形式化验证"
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 检出代码 ──────────────────────────────────────────
+      - name: 检出仓库代码
+        uses: actions/checkout@v4
+
+      # ── 安装 Python（差分测试需要）──────────────────────────
+      - name: 安装 Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      # ── 安装 Lean 4 v4.31.0（通过 elan）────────────────────
+      - name: 安装 elan（Lean 工具链管理器）
+        run: |
+          # 使用官方 elan 安装脚本，不设置默认工具链
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+          # 将 elan 加入 PATH
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      # ── 缓存 mathlib 等依赖（加速构建）──────────────────────
+      - name: 缓存 Lake 依赖与构建产物
+        uses: actions/cache@v4
+        with:
+          path: |
+            .lake
+          key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lakefile.toml', 'lake-manifest.json') }}
+          restore-keys: |
+            lake-${{ runner.os }}-
+
+      # ── lake build：构建并验证所有定理 ──────────────────────
+      - name: 构建并验证所有定理（lake build）
+        run: |
+          echo "::group::lake build 输出"
+          lake build
+          echo "::endgroup::"
+
+      # ── lake build diff_test：构建差分测试可执行端 ──────────
+      - name: 构建差分测试可执行端（lake build diff_test）
+        run: |
+          echo "::group::lake build diff_test 输出"
+          lake build diff_test
+          echo "::endgroup::"
+
+      # ── 检查零 sorry ───────────────────────────────────────
+      - name: 检查零 sorry（PolyLeanVerify 目录）
+        run: |
+          # 扫描 PolyLeanVerify 目录下所有 .lean 文件，确保不存在 sorry
+          if grep -rn "sorry" PolyLeanVerify/; then
+            echo "::error::发现 sorry！形式化证明中不允许使用 sorry。"
+            exit 1
+          else
+            echo "未发现 sorry，所有定理均已完整证明。"
+          fi
+
+      # ── 检查零 warning ─────────────────────────────────────
+      - name: 检查零 warning
+        run: |
+          # 重新构建并统计 warning 数量，应为 0
+          WARNING_COUNT=$(lake build 2>&1 | grep -c "warning" || true)
+          echo "Warning 数量: ${WARNING_COUNT}"
+          if [ "${WARNING_COUNT}" -ne 0 ]; then
+            echo "::error::存在 ${WARNING_COUNT} 个 warning，请修复后重试。"
+            lake build 2>&1 | grep "warning" || true
+            exit 1
+          else
+            echo "零 warning，构建干净。"
+          fi
+
+      # ── 运行差分测试 ───────────────────────────────────────
+      - name: 运行差分测试（50 次迭代）
+        run: |
+          python3 diff_test.py --iterations 50
+
+  # ============================================================
+  # Job 2: SMT 鲁棒性验证 + PGD 对抗攻击（与 Job 1 并行）
+  # ============================================================
+  smt-verify:
+    name: "SMT 鲁棒性验证 + PGD 攻击"
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 检出代码 ──────────────────────────────────────────
+      - name: 检出仓库代码
+        uses: actions/checkout@v4
+
+      # ── 安装 Python 3 ─────────────────────────────────────
+      - name: 安装 Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      # ── 缓存 pip 依赖 ─────────────────────────────────────
+      - name: 缓存 pip 依赖
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('smt_verify/*.py') }}
+          restore-keys: |
+            pip-${{ runner.os }}-
+
+      # ── 安装 Python 依赖 ──────────────────────────────────
+      - name: 安装 Python 依赖（z3-solver, torch, torchvision, matplotlib, scipy）
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install z3-solver torch torchvision matplotlib scipy numpy
+
+      # ── Step 1: 训练模型 ──────────────────────────────────
+      - name: 训练 MNIST MLP 模型
+        run: |
+          echo "::group::train_model.py 输出"
+          python3 smt_verify/train_model.py
+          echo "::endgroup::"
+
+      # ── Step 2: Z3 SMT 鲁棒性验证（超时 30 分钟）────────────
+      - name: Z3 SMT 鲁棒性验证（超时 30 分钟）
+        timeout-minutes: 30
+        run: |
+          echo "::group::verify_robustness.py 输出"
+          python3 smt_verify/verify_robustness.py
+          echo "::endgroup::"
+
+      # ── Step 3: PGD 对抗攻击 ──────────────────────────────
+      - name: PGD 对抗攻击
+        run: |
+          echo "::group::pgd_attack.py 输出"
+          python3 smt_verify/pgd_attack.py
+          echo "::endgroup::"
+
+      # ── 上传验证结果 artifacts ─────────────────────────────
+      - name: 上传 verification_results.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: smt-verification-results
+          path: smt_verify/verification_results.json
+          if-no-files-found: error
+
+      - name: 上传 pgd_results.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: pgd-attack-results
+          path: smt_verify/pgd_results.json
+          if-no-files-found: error

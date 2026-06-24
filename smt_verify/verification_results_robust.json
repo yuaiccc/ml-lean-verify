@@ -1,0 +1,167 @@
+[
+  {
+    "sample_idx": 0,
+    "label": 7,
+    "epsilon": 0.02,
+    "status": "safe",
+    "elapsed": 71.71265006065369,
+    "n_active_pixels": 184,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 180000
+  },
+  {
+    "sample_idx": 0,
+    "label": 7,
+    "epsilon": 0.05,
+    "status": "safe",
+    "elapsed": 71.13379502296448,
+    "n_active_pixels": 184,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 120000
+  },
+  {
+    "sample_idx": 0,
+    "label": 7,
+    "epsilon": 0.1,
+    "status": "unknown",
+    "elapsed": 60.08052086830139,
+    "n_active_pixels": 184,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 60000
+  },
+  {
+    "sample_idx": 1,
+    "label": 2,
+    "epsilon": 0.02,
+    "status": "safe",
+    "elapsed": 134.58447003364563,
+    "n_active_pixels": 251,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 180000
+  },
+  {
+    "sample_idx": 1,
+    "label": 2,
+    "epsilon": 0.05,
+    "status": "unknown",
+    "elapsed": 120.06377601623535,
+    "n_active_pixels": 251,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 120000
+  },
+  {
+    "sample_idx": 1,
+    "label": 2,
+    "epsilon": 0.1,
+    "status": "unknown",
+    "elapsed": 60.10447978973389,
+    "n_active_pixels": 251,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 60000
+  },
+  {
+    "sample_idx": 2,
+    "label": 1,
+    "epsilon": 0.02,
+    "status": "unknown",
+    "elapsed": 180.02400469779968,
+    "n_active_pixels": 111,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 180000
+  },
+  {
+    "sample_idx": 2,
+    "label": 1,
+    "epsilon": 0.05,
+    "status": "unknown",
+    "elapsed": 120.05716514587402,
+    "n_active_pixels": 111,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 120000
+  },
+  {
+    "sample_idx": 2,
+    "label": 1,
+    "epsilon": 0.1,
+    "status": "unknown",
+    "elapsed": 60.02173328399658,
+    "n_active_pixels": 111,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 60000
+  },
+  {
+    "sample_idx": 3,
+    "label": 0,
+    "epsilon": 0.02,
+    "status": "safe",
+    "elapsed": 172.7099850177765,
+    "n_active_pixels": 272,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 180000
+  },
+  {
+    "sample_idx": 3,
+    "label": 0,
+    "epsilon": 0.05,
+    "status": "unknown",
+    "elapsed": 120.08080625534058,
+    "n_active_pixels": 272,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 120000
+  },
+  {
+    "sample_idx": 3,
+    "label": 0,
+    "epsilon": 0.1,
+    "status": "unknown",
+    "elapsed": 60.1602737903595,
+    "n_active_pixels": 272,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 60000
+  },
+  {
+    "sample_idx": 4,
+    "label": 4,
+    "epsilon": 0.02,
+    "status": "safe",
+    "elapsed": 97.68838691711426,
+    "n_active_pixels": 200,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 180000
+  },
+  {
+    "sample_idx": 4,
+    "label": 4,
+    "epsilon": 0.05,
+    "status": "safe",
+    "elapsed": 106.37461590766907,
+    "n_active_pixels": 200,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 120000
+  },
+  {
+    "sample_idx": 4,
+    "label": 4,
+    "epsilon": 0.1,
+    "status": "unknown",
+    "elapsed": 60.06367015838623,
+    "n_active_pixels": 200,
+    "adv_prediction": null,
+    "adv_distance": null,
+    "timeout_ms": 60000
+  }
+]
