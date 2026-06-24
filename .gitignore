@@ -10,3 +10,4 @@ lake-manifest.json
 smt_verify/data/
 smt_verify/mnist_tiny.pt
 smt_verify/test_samples.npy
+.DS_Store
